@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cisco DevNet Associate Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0e1a;--surface:#111827;--surface2:#1a2235;--border:#1e3a5f;--accent:#00d4ff;--accent2:#0062ff;--green:#00e676;--red:#ff4757;--text:#e2e8f0;--muted:#64748b;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+  .container{max-width:860px;margin:0 auto;padding:32px 20px;position:relative;z-index:1;}
+  .header{text-align:center;margin-bottom:40px;}
+  .logo-badge{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--accent2),var(--accent));padding:6px 16px;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;color:white;}
+  .logo-badge::before{content:'◈';font-size:14px;}
+  h1{font-size:clamp(28px,5vw,48px);font-weight:800;line-height:1.1;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;}
+  .subtitle{color:var(--muted);font-size:15px;font-family:'JetBrains Mono',monospace;}
+  .progress-wrapper{margin-bottom:20px;}
+  .progress-meta{display:flex;justify-content:space-between;margin-bottom:8px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);}
+  .progress-bar{width:100%;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:2px;transition:width 0.4s ease;box-shadow:0 0 12px rgba(0,212,255,0.5);}
+  .jump-nav{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:20px;}
+  .jump-btn{width:30px;height:30px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;}
+  .jump-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .jump-btn.active{border-color:var(--accent2);background:rgba(0,98,255,0.25);color:white;}
+  .jump-btn.done-correct{border-color:var(--green);background:rgba(0,230,118,0.12);color:var(--green);}
+  .jump-btn.done-wrong{border-color:var(--red);background:rgba(255,71,87,0.12);color:var(--red);}
+  .question-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:20px;position:relative;overflow:hidden;animation:slideIn 0.3s ease;}
+  .question-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent2),var(--accent));}
+  @keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .q-tag{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .question-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;}
+  .multi-badge{font-family:'JetBrains Mono',monospace;font-size:10px;color:#ffa500;background:rgba(255,165,0,0.1);border:1px solid rgba(255,165,0,0.3);padding:2px 8px;border-radius:10px;letter-spacing:1px;}
+  .question-text{font-size:16px;font-weight:600;line-height:1.65;margin-bottom:24px;color:#f1f5f9;}
+  .options{display:flex;flex-direction:column;gap:10px;}
+  .option{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.2s;font-size:14px;color:var(--text);text-align:left;line-height:1.5;}
+  .option:hover:not(.disabled){border-color:var(--accent);background:rgba(0,212,255,0.05);transform:translateX(4px);}
+  .option-letter{width:28px;height:28px;min-width:28px;border-radius:6px;background:rgba(255,255,255,0.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--muted);transition:all 0.2s;margin-top:1px;}
+  .option.selected{border-color:var(--accent2);background:rgba(0,98,255,0.12);}
+  .option.selected .option-letter{background:var(--accent2);border-color:var(--accent2);color:white;}
+  .option.correct{border-color:var(--green);background:rgba(0,230,118,0.1);}
+  .option.correct .option-letter{background:var(--green);border-color:var(--green);color:#0a0e1a;}
+  .option.wrong{border-color:var(--red);background:rgba(255,71,87,0.1);}
+  .option.wrong .option-letter{background:var(--red);border-color:var(--red);color:white;}
+  .option.disabled{cursor:not-allowed;}
+  .option.disabled:not(.correct):not(.wrong):not(.selected){opacity:0.5;}
+  .explanation{margin-top:16px;padding:16px;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;font-size:13px;line-height:1.7;color:#94a3b8;font-family:'JetBrains Mono',monospace;display:none;}
+  .explanation.show{display:block;}
+  .explanation strong{color:var(--accent);}
+  .nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px;}
+  .btn{padding:12px 24px;border-radius:8px;border:none;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;}
+  .btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:white;box-shadow:0 4px 20px rgba(0,98,255,0.3);}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,98,255,0.4);}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-check{background:var(--surface2);border:1px solid var(--accent);color:var(--accent);}
+  .btn-check:hover{background:rgba(0,212,255,0.1);}
+  .btn-check:disabled{opacity:0.4;cursor:not-allowed;}
+  .results-screen{text-align:center;display:none;}
+  .score-ring-wrapper{position:relative;width:180px;height:180px;margin:0 auto 32px;}
+  .score-ring{width:180px;height:180px;transform:rotate(-90deg);}
+  .score-ring-bg{fill:none;stroke:var(--surface2);stroke-width:10;}
+  .score-ring-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1);}
+  .score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .score-pct{font-size:42px;font-weight:800;line-height:1;}
+  .score-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+  .grade-badge{display:inline-block;padding:8px 24px;border-radius:40px;font-size:18px;font-weight:800;margin-bottom:16px;letter-spacing:1px;}
+  .stats-row{display:flex;justify-content:center;gap:14px;margin-bottom:32px;flex-wrap:wrap;}
+  .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 20px;min-width:80px;}
+  .stat-val{font-size:26px;font-weight:800;font-family:'JetBrains Mono',monospace;}
+  .stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
+  .review-section{margin-top:40px;text-align:left;}
+  .review-title{font-size:18px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+  .review-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px;}
+  .review-item.correct-item{border-left:3px solid var(--green);}
+  .review-item.wrong-item{border-left:3px solid var(--red);}
+  .review-q{font-size:14px;font-weight:600;margin-bottom:10px;color:#e2e8f0;line-height:1.5;}
+  .review-answers{font-family:'JetBrains Mono',monospace;font-size:12px;display:flex;flex-direction:column;gap:5px;}
+  .review-your{color:var(--red);}
+  .review-correct-ans{color:var(--green);}
+  .review-exp{margin-top:8px;padding:10px 12px;background:rgba(0,212,255,0.05);border-left:2px solid var(--accent);border-radius:4px;color:#94a3b8;font-size:11px;line-height:1.6;}
+  .start-screen{text-align:center;padding:40px 0;}
+  .start-screen h2{font-size:24px;font-weight:700;margin-bottom:14px;}
+  .start-screen p{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:13px;margin-bottom:24px;line-height:1.8;}
+  .topic-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px;}
+  .topic-tag{padding:5px 12px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo-badge">Cisco DevNet Associate v1.0</div>
+    <h1>Final Exam Quiz</h1>
+    <p class="subtitle">// 200-901 DEVASC · Official Exam Questions</p>
+  </div>
+
+  <div id="start-screen" class="start-screen">
+    <h2>Ready to test your knowledge?</h2>
+    <p>All 107 questions from the DevNet Associate v1.0 Final Exam.<br>Select your answer → Check it → Review everything at the end.</p>
+    <div class="topic-list">
+      <span class="topic-tag">Linux & Python</span><span class="topic-tag">REST APIs & HTTP</span>
+      <span class="topic-tag">NETCONF / YANG</span><span class="topic-tag">Ansible & Jenkins</span>
+      <span class="topic-tag">Docker & Containers</span><span class="topic-tag">DevNet Resources</span>
+      <span class="topic-tag">Network Fundamentals</span><span class="topic-tag">NAT & DHCP</span>
+      <span class="topic-tag">SDN & ACI</span><span class="topic-tag">Security</span>
+      <span class="topic-tag">Cisco ISE & UCS</span><span class="topic-tag">Webex & Meraki APIs</span>
+      <span class="topic-tag">VLAN & Switching</span><span class="topic-tag">Software Development</span>
+    </div>
+    <p style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:14px;margin-bottom:24px;">// 107 questions loaded · some require multiple answers</p>
+    <button class="btn btn-primary" onclick="startQuiz()" style="padding:16px 48px;font-size:16px;">Start Quiz →</button>
+  </div>
+
+  <div id="quiz-screen" style="display:none;">
+    <div class="progress-wrapper">
+      <div class="progress-meta">
+        <span id="q-counter">Question 1 of 107</span>
+        <span id="q-score-live">Score: 0/0</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="jump-nav" id="jump-nav"></div>
+    <div class="question-card" id="question-card">
+      <div class="q-tag">
+        <div class="question-num" id="q-num">QUESTION 01</div>
+        <div class="multi-badge" id="multi-badge" style="display:none;">CHOOSE MULTIPLE</div>
+      </div>
+      <div class="question-text" id="q-text"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-ghost" id="btn-prev" onclick="prevQ()" disabled>← Back</button>
+      <button class="btn btn-check" id="btn-check" onclick="checkAnswer()" disabled>Check Answer</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()">Next →</button>
+    </div>
+  </div>
+
+  <div id="results-screen" class="results-screen">
+    <div class="score-ring-wrapper">
+      <svg class="score-ring" viewBox="0 0 180 180">
+        <circle class="score-ring-bg" cx="90" cy="90" r="80"/>
+        <circle class="score-ring-fill" id="ring-fill" cx="90" cy="90" r="80" stroke-dasharray="502" stroke-dashoffset="502"/>
+      </svg>
+      <div class="score-center">
+        <div class="score-pct" id="score-pct">0%</div>
+        <div class="score-label">Score</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-badge"></div>
+    <p id="grade-msg" style="color:var(--muted);font-size:14px;margin-bottom:28px;font-family:'JetBrains Mono',monospace;line-height:1.7;"></p>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-val" id="stat-correct" style="color:var(--green)">0</div><div class="stat-lbl">Correct</div></div>
+      <div class="stat-box"><div class="stat-val" id="stat-wrong" style="color:var(--red)">0</div><div class="stat-lbl">Wrong</div></div>
+      <div class="stat-box"><div class="stat-val" id="stat-skipped" style="color:var(--muted)">0</div><div class="stat-lbl">Skipped</div></div>
+      <div class="stat-box"><div class="stat-val" id="stat-total" style="color:var(--accent)">0</div><div class="stat-lbl">Total</div></div>
+    </div>
+    <button class="btn btn-primary" onclick="restartQuiz()" style="padding:14px 36px;margin-bottom:8px;">↺ Retake Quiz</button>
+    <div class="review-section" id="review-section"></div>
+  </div>
+</div>
+
+<script>
+const Q = [
+  {q:"A pharmaceutical company wants to contract cloud services to store employee data and company-specific applications with strict access security. Which type of cloud is most appropriate?",o:["Community cloud","Public cloud","Hybrid cloud","Private cloud"],c:3,e:"Private clouds are intended for a specific organization. They can be set up using the organization's own network or managed by an outside organization with strict access security."},
+  {q:"What is a function provided by an implementation of a read-only automation solution?",o:["The ability to reduce risk by implementing security policies across the network infrastructure via automated changes","The ability to use GET and SET requests to retrieve and send data across the network infrastructure","The ability to use an automated request to audit configurations and manually deploy changes in order to implement compliance","The ability to implement network infrastructure that receives a configuration from a specific centralized server"],c:2,e:"A read-only scenario lets you audit configurations and then put the configuration back into compliance."},
+  {q:"Which THREE statements correctly describe the function of TCP or UDP? (Choose three.)",o:["The TCP process running on the PC randomly selects the destination port when establishing a session with the server.","UDP segments are encapsulated within IP packets for transport across the network.","The TCP source port number identifies the sending host on the network.","The UDP destination port number identifies the application or service on the server which will handle the data.","The source port field identifies the running application or service that will handle data returning to the PC.","TCP is the preferred protocol when a function requires lower network overhead."],c:[1,3,4],m:1,e:"UDP segments are encapsulated in IP packets. The UDP destination port identifies the server application. The source port identifies the return path application. UDP (not TCP) is preferred for low overhead. Source IP (not port) identifies the host."},
+  {q:"What type of attack targets an SQL database using the input field of a user?",o:["Buffer overflow","SQL injection","Cross-site scripting","XML injection"],c:1,e:"SQL injection inserts a malicious SQL statement in an entry field where the system does not filter user input correctly."},
+  {q:"Which command can be used on Linux and MAC hosts to get IP addressing information?",o:["ipconfig","ip address","ifconfig","networksetup -getinfo"],c:2,e:"Linux and Mac use 'ifconfig' for IP addressing information. 'ipconfig' is used on Windows."},
+  {q:"What are TWO reasons a network administrator would segment a network with a Layer 2 switch? (Choose two.)",o:["To create fewer collision domains","To create more broadcast domains","To enhance user bandwidth","To isolate ARP request messages from the rest of the network","To eliminate virtual circuits","To isolate traffic between segments"],c:[2,5],m:1,e:"A Layer 2 switch enhances user bandwidth by creating point-to-point connections, and isolates traffic between segments."},
+  {q:"Which tool might a developer use as part of a Continuous Integration pipeline in order to build and test source code?",o:["SQL","REST","Docker","Jenkins"],c:3,e:"Jenkins, CircleCI, and Travis CI are automated testing tools commonly used in CI pipelines."},
+  {q:"A packet is received by a server. The packet has a destination port number of 8008. What protocol or service is requested?",o:["Telnet over SSH","RESTCONF","HTTP","NETCONF"],c:2,e:"Port 8008 is an alternate HTTP port."},
+  {q:"A network contains multiple VLANs spanning multiple switches. What happens when a device in VLAN 20 sends a broadcast Ethernet frame?",o:["Devices in VLAN 20 and the management VLAN see the frame.","All devices in all VLANs see the frame.","Only devices connected to the local switch see the frame.","Only devices in VLAN 20 see the frame."],c:3,e:"VLANs create logical broadcast domains. Only devices in the same VLAN see the broadcast frame."},
+  {q:"Which piece of software is responsible for creating and managing virtual machines, including allocating system resources to each virtual machine as needed?",o:["Supervisor","Hypervisor","Host operating system","Hosted operating system"],c:1,e:"A hypervisor creates, manages, and allocates system resources to virtual machines."},
+  {q:"How is an Ethernet MAC address constructed?",o:["The first 3 bytes represent the network upon which the host resides, and the last 3 bytes uniquely identify the host.","The first 3 bytes represent the vendor OUI, and the last 3 bytes are assigned uniquely by the vendor.","The first 3 bytes are uniquely assigned by IANA, and the last 3 bytes represent the serial number of the host.","The first 3 bytes represent the vendor OUI, and the last 3 bytes are assigned randomly by the operating system."],c:1,e:"The first 3 bytes of a MAC address are the vendor OUI (Organizationally Unique Identifier); the last 3 bytes are uniquely assigned by the vendor."},
+  {q:"Which Cisco SDK works with ACI?",o:["Cobra","IMC","UCS","Instant Connect"],c:0,e:"The Cobra SDK is the Python SDK designed to work with Cisco ACI and the APIC controller."},
+  {q:"What platforms are provided by DevNet for community members to share solutions, tool kits, and other resources with each other?",o:["Communities","Forums","Sandboxes","Exchanges"],c:3,e:"DevNet's Code Exchange and Automation Exchange let community members share solutions, toolkits, and resources."},
+  {q:"Which TWO data formats can RESTCONF use when requesting or responding with data? (Choose two.)",o:["JSON","XML","YAML","YANG","HTML"],c:[0,1],m:1,e:"RESTCONF requests and responses can use either JSON or XML. YANG is a modeling language, not a data format."},
+  {q:"Which DevNet resource would a developer use to look for a Python library that supports APIs for a specific Cisco product?",o:["DevNet Learning Labs","DevNet Support","Code Exchange","DevNet Sandbox"],c:2,e:"Code Exchange is where developers search for libraries, code samples, and projects for specific Cisco product APIs."},
+  {q:"A component combined the disciplines of Dev and Ops, creating a new job role and best-practices playbook for doing Ops with software methods. Which component matches this description?",o:["Agile Infrastructure and Operations","The SRE approach","Automated infrastructure","Shared version control"],c:1,e:"Google institutionalized the Site Reliability Engineer (SRE) role, which fuses Dev and Ops disciplines with a best-practices playbook for doing Ops with software methods."},
+  {q:"A user is working on Ansible on the local NMS to manage remote network devices. The user creates a file with an alias for the remote device and SSH credentials. Which file is the user creating?",o:["service","playbook","variable","hosts"],c:3,e:"Ansible uses an inventory file called 'hosts' that contains device information including an alias and SSH credentials for remote devices."},
+  {q:"Which DevNet resource would a developer use in order to test custom code in a production-like environment?",o:["DevNet Support","DevNet Learning Labs","Code Exchange","DevNet Sandbox"],c:3,e:"DevNet Sandbox provides a test bed to try out Cisco hardware and environments within a realistic, production-like setting."},
+  {q:"In which situation would a company implement a reverse proxy as a security solution?",o:["When the company has a database and needs to point to a DNS server that uses different IP addresses for development resources.","When the company wants all responses to clients to look like they came from the same server instead of individual ones.","When a hash is created based on the IP address of the request to a particular protected server.","When responses from servers need to be sent over different paths to ensure quality response time."],c:1,e:"A reverse proxy makes responses appear to come from a single server, whereas a regular proxy makes requests appear to come from a single client."},
+  {q:"A software development company uses the Agile method. What is a characteristic of this method?",o:["A software development process where the highest priority is to satisfy the customer through early and continuous delivery of valuable software.","A process that eliminates anything that does not add value to the project including meetings and documentation.","A software development process that has the results of one phase feed into the next phase.","A more traditional software development process."],c:0,e:"Agile's highest priority is satisfying the customer through early and continuous delivery of valuable software, and prioritizes responding to change over following a plan."},
+  {q:"A network engineer is creating a Docker container using the docker build command. If the engineer does not specify a tag, which tag will be used by default?",o:["tag","latest","(a blank space)","default"],c:1,e:"When building a Docker image without specifying a tag, Docker automatically assigns the 'latest' tag."},
+  {q:"Which component in the pyATS ecosystem handles bundling and running jobs?",o:["AEtest","Clover","Genie","EasyPy"],c:3,e:"EasyPy is the component in the pyATS ecosystem responsible for bundling and running jobs (test scripts)."},
+  {q:"Which THREE avenues are available within DevNet for developers who need help with specific developer scenario questions? (Choose three.)",o:["Logging a ticket","Posting to the DevNet zone","Posting to a news group","Posting to a community forum","Posting to a Webex Teams space","Posting on the Cisco Learning Network"],c:[1,3,4],m:1,e:"DevNet provides help through the DevNet Zone, community forums, and Webex Teams spaces for developer scenario questions."},
+  {q:"A student who is a kinesthetic learner (learns by doing) wants to learn about network programmability. Which DevNet resource should the instructor recommend?",o:["DevNet Create","DevNet Learning Labs","DevNet Express","DevNet Zone"],c:1,e:"DevNet Learning Labs are interactive, hands-on tutorials perfect for kinesthetic learners."},
+  {q:"What is the default shell commonly used on macOS and Linux?",o:["tcsh","csh","Bourne","Bash"],c:3,e:"Bash (Bourne Again Shell) is the default shell commonly used on macOS and most Linux distributions."},
+  {q:"What is immutable infrastructure in DevOps?",o:["Infrastructure deployed with all component versions locked except for the ability to perform manual configuration changes.","Infrastructure that is only deployed and maintained in containers.","Infrastructure that is entirely maintained and deployed in code and never subjected to manual changes.","Virtualized infrastructure that is deployed as golden images."],c:2,e:"Immutable infrastructure can never be changed manually. In DevOps, it is entirely maintained through code."},
+  {q:"What is the most common cause of IT outages?",o:["An engineer misconfiguring a device or network with manual changes.","An experienced engineer using an open source product.","An experienced engineer implementing a configuration using automation.","A threat actor targeting the enterprise equipment."],c:0,e:"Most IT outages are caused by misconfiguration due to human error during manual changes."},
+  {q:"Which string of characters identifies the beginning of a new separate document in a single YAML file?",o:['Three slashes "///"','Three dots "..."','Three pound signs "###"','Three dashes "---"'],c:3,e:"YAML uses three dashes (---) on a line by itself to mark the beginning of a new document within a file."},
+  {q:"What is the difference between functions and methods in Python?",o:["Functions can use global variables whereas methods can only use local variables.","Functions are called by a referencing object whereas methods are called by the names.","Functions can pass arguments whereas methods can pass only predefined keywords.","Functions are standalone code blocks whereas methods are code blocks associated with an object."],c:3,e:"Functions are standalone code blocks; methods are code blocks associated with an object, used in object-oriented programming."},
+  {q:"Which command is used to create a new Git repository?",o:["git init","git add","git commit","git clone"],c:0,e:"'git init' initializes a new, empty Git repository in the current directory."},
+  {q:"Which stakeholder determines the useful value of software product features in the Lean process?",o:["The customer","The Scrum master","The reviewer","The programmer"],c:0,e:"In Lean, the customer determines what is valuable. Lean focuses on eliminating waste and delivering only what the customer values."},
+  {q:"What is a principle of the Lean software development model?",o:["Adding additional product features that the customer did not ask for.","Assigning resources to multiple projects to divide effort on more than one task at a time.","Making decisions as late as possible in the process so that more facts and details are available.","Ordering workers to do tasks they may not want to do to ensure they get done."],c:2,e:"Lean defers decisions until the last responsible moment so decisions are based on the most available facts and information."},
+  {q:"What character is used to separate the key and value pairs in YAML?",o:["Colon (:)","Semi-colon (;)","Underscore (_)","Forward slash (/)"],c:0,e:"In YAML, a colon (:) followed by a space separates key-value pairs."},
+  {q:"Which git command is used to compare changes between files?",o:["git diff","git merge","git checkout","git status"],c:0,e:"'git diff' shows differences between files — comparing changes in the working directory, staging area, or between commits."},
+  {q:"What is an example of a use supported by Cisco UCS Director and UCS Manager?",o:["Bare metal server provisioning and monitoring of virtual environments.","Call center and call management over IP networks.","Underlying central system workflow management and migration.","Telemetry data collection and analysis."],c:0,e:"Cisco UCS Director and UCS Manager support bare metal server provisioning and monitoring of virtual environments."},
+  {q:"How can a Webex Teams administrator retrieve additional details about a user through an API call?",o:["By using the value of the organization name in the API call.","By using the value of a Webex Teams registered email address in the API call.","By using the value of the person id key in the API call.","By using the value of orgId in the API call."],c:2,e:"To retrieve additional user details via the Webex Teams API, use the person id key value in the API call."},
+  {q:"Which library is the most commonly used Python library for connecting NETCONF clients with a NETCONF server?",o:["posix","pyclient","ncclient","pypi"],c:2,e:"ncclient is the most commonly used Python library for implementing NETCONF clients."},
+  {q:"Which TWO APIs allow for Cisco Meraki device provisioning and real-time notifications? (Choose two.)",o:["Webhook API","Investigation API","Dashboard API","Enforcement API","Reporting API"],c:[0,2],m:1,e:"Dashboard API is a RESTful service for device provisioning and management. Webhook API provides real-time notifications for network alerts."},
+  {q:"A packet is received by a server. The packet has a destination port number of 443. What protocol or service is requested?",o:["HTTP","NTP","DHCP","HTTPS"],c:3,e:"Port 443 is the standard port for HTTPS (HTTP Secure), using SSL/TLS encryption."},
+  {q:"When thinking about the functional planes of a network, what is unique about the data plane?",o:["It includes protocols used to remotely access network devices.","It includes the SSH protocol.","It manipulates data and outputs it in the XML format.","It forwards data through a network device such as a router or a switch."],c:3,e:"The data plane (forwarding plane) is responsible for forwarding data packets through network devices using hardware."},
+  {q:"Which Docker component defines the steps needed to create an image that can be deployed in a variety of environments?",o:["UnionFS","Dockerfile","Cross-site script","Namespaces"],c:1,e:"A Dockerfile is a text document containing all commands needed to assemble a Docker image."},
+  {q:"Which THREE statements describe characteristics of a virtual machine? (Choose three.)",o:["It is created and deployed using the Docker format.","It includes a guest operating system.","It runs on top of a hypervisor.","It shares the operating system of the host computer.","It is completely self-contained with its own emulated storage, memory, and network interfaces.","It requires Windows as the host operating system."],c:[1,2,4],m:1,e:"VMs include a guest OS, run on a hypervisor, and are self-contained with emulated storage, memory, and network interfaces. Containers (not VMs) share the host OS."},
+  {q:"Which TWO statements are true about characteristics of the staging environment? (Choose two.)",o:["It is the point where code has been tested multiple times and is error free.","It is structured as close as possible to the actual production environment.","It is where the code undergoes final acceptance testing in a realistic environment.","It is where end users will interact with the code.","It often includes automated testing tools such as Jenkins, CircleCI, or Travis CI."],c:[1,2],m:1,e:"The staging environment mirrors production as closely as possible and is where code undergoes final acceptance testing."},
+  {q:"A network administrator can successfully ping www.cisco.com, but cannot ping the company web server at an ISP in another city. Which tool would identify the specific router where the packet was lost or delayed?",o:["traceroute","ipconfig","telnet","netstat"],c:0,e:"Traceroute identifies each hop along the path and shows where packets stop being forwarded, helping pinpoint the problem router."},
+  {q:"Which TWO HTTP functions correspond to the UPDATE function in CRUD? (Choose two.)",o:["POST","DELETE","PATCH","PUT","GET"],c:[2,3],m:1,e:"CRUD: GET=READ, POST=CREATE, PUT/PATCH=UPDATE, DELETE=DELETE. Both PUT and PATCH correspond to UPDATE."},
+  {q:"Which HTTP status code category indicates that a REST API request contains an error on the client side?",o:["1xx","2xx","3xx","4xx","5xx"],c:3,e:"4xx client error responses indicate the request contains an error such as bad syntax or invalid input."},
+  {q:"What are TWO requirements for an application to communicate with a webhook provider? (Choose two.)",o:["The application must support JSON.","The application must always be running.","The application must register a URL with the webhook provider.","The host must have an SSH client installed.","The host must have an SSH server running."],c:[1,2],m:1,e:"To receive webhook notifications: the app must be running at all times to receive HTTP POST requests, and it must register a URI with the webhook provider."},
+  {q:"A student sends a REST API request and receives a status code of 202. What does this status code mean?",o:["The request was understood but has been rejected by the server.","The request was successful and typically includes a payload.","The request has been accepted for processing, but the processing has not been completed.","Because of a server error, the request cannot be fulfilled."],c:2,e:"HTTP 202 Accepted: the request has been received and accepted for processing, but processing has not yet been completed."},
+  {q:"Which TWO statements are true about NTP servers in an enterprise network? (Choose two.)",o:["There can only be one NTP server on an enterprise network.","All NTP servers synchronize directly to a stratum 1 time source.","NTP servers at stratum 1 are directly connected to an authoritative time source.","NTP servers ensure an accurate time stamp on logging and debugging information.","NTP servers control the mean time between failures (MTBF) for key network devices."],c:[2,3],m:1,e:"Stratum 1 NTP servers are directly connected to an authoritative time source. NTP ensures accurate timestamps for managing, securing, and troubleshooting networks."},
+  {q:"What is a characteristic of the Waterfall software development method?",o:["A process that amplifies learning as well as delivers as quickly as possible.","A software development process where the highest priority is to satisfy the customer through early and continuous delivery.","A software development process where a particular phase depends on the results of the previous phase.","A process that eliminates anything that does not add value to the project."],c:2,e:"In Waterfall, each phase depends on the results of the previous phase. The process goes in one direction only — like a relay race."},
+  {q:"In which SDLC phase is the software product installed into the production environment to decide if it is ready for release?",o:["Implementation","Deployment","Design","Testing"],c:1,e:"During the deployment phase, software is installed into the production environment and the product manager decides whether it is ready to be released."},
+  {q:"Which convention is used in Python to indicate that methods and variables in a class are private?",o:["By using a single preceding underscore ( _ ) for a method or variable.","By using the command 'class private classname():' to start the class definition.","By using two preceding hyphens ( -- ) for a method or variable.","By declaring a private method or variable at the beginning of the class definition."],c:0,e:"Python convention uses a single preceding underscore (_) to indicate that a method or variable is intended to be private."},
+  {q:"A packet is received by a server. The packet has a destination port number of 80. What protocol or service is requested?",o:["DHCP","Telnet over SSH","HTTP","RESTCONF"],c:2,e:"Port 80 is the standard port for HTTP (Hypertext Transfer Protocol), used for unencrypted web traffic."},
+  {q:"A network administrator is developing an application to control a Webex device through xAPI. Which THREE protocols can be used to access xAPI? (Choose three.)",o:["Telnet","HTTP","XML","RS-232","FTP","JSON"],c:[0,1,3],m:1,e:"xAPI can be accessed through Telnet/SSH, HTTP, and RS-232 serial connection."},
+  {q:"Which type of request is used to send a message to a Webex Teams space using Python and the Messages API?",o:["PUT","POST","GET","PATCH"],c:1,e:"A POST request creates a new message in a Webex Teams space. POST corresponds to CREATE in CRUD."},
+  {q:"A network administrator needs a product with a rule-based engine for enabling policy-based network access to users and devices with API-based threat containment. Which Cisco product fits?",o:["Identity Services Engine","Umbrella","Threat Grid","Advanced Malware Protection"],c:0,e:"Cisco ISE provides a rule-based engine for policy-based network access. With ISE APIs, you can automate threat containment when a threat is detected."},
+  {q:"Which technique is used to make the output of password hashing nondeterministic?",o:["Password length and complexity","Multifactor authentication","Password salting","Password strength validation tools"],c:2,e:"Password salting adds a unique random value to each password before hashing, making the output nondeterministic and preventing rainbow table attacks."},
+  {q:"What does self-service refer to in the context of enterprise IT?",o:["Imaging frequently used server configurations for rapid deployment.","Distributing and implementing broad access to public cloud infrastructure-as-a-service.","Mainstreamed processes that promote a lower IT headcount by implementing automation.","Automated tools and methods that deliver preconfigured developer platforms on demand."],c:3,e:"Self-service in IT automation refers to automated tools that deliver preconfigured developer platforms on demand without requiring manual IT intervention."},
+  {q:"Which statement describes the term 'orchestration' in IT automation?",o:["Orchestration is aimed at managing workload lifecycles and reacting dynamically to changing conditions in order to optimize processes.","Orchestration is the process of preparing a server through the installation of libraries or daemons.","Orchestration is the building, arranging, integration, and preparation of multi-component applications across multiple nodes.","Orchestration is the obtaining and provisioning of compute, storage, and network infrastructure."],c:0,e:"Orchestration manages workload lifecycles and reacts dynamically to changing conditions (e.g., autoscaling, self-healing), particularly in container environments."},
+  {q:"What is an example of a read-only automation solution?",o:["Streamlining the management of L3 firewall rules in Cisco Meraki networks.","Gathering SD-WAN inventory data using Python and recording the values in a database.","Simplifying the automation of network device authentication, configuration, and consistency.","Gathering the current list of ACL entries on an IOS XE router and enforcing consistency."],c:1,e:"Gathering SD-WAN inventory data and storing it in a database is read-only — it reads data without making any changes to the network."},
+  {q:"A student sets up the CSR1000v VM in VirtualBox and accesses https://192.168.56.101. A 'Warning: Potential Security Risk Ahead' message appears. What is the security issue?",o:["The SSL/TLS certificate uses a public key size of less than 1024 bits.","The SSL/TLS certificate is self-signed by the router.","The CA for the SSL/TLS certificate cannot be reached.","The traffic to the VM is not encrypted."],c:1,e:"The router uses a self-signed SSL/TLS certificate. Since it is not signed by a trusted CA, the browser shows a security warning."},
+  {q:"How do APIs affect traditional IT tasks?",o:["They are used to replace network infrastructure and implement network virtualization.","They are used to eliminate repetitive manual tasks and replace them with automation.","They are used to increase computer processing speed and lower power consumption.","They are used to increase hardware speed and lower power consumption."],c:1,e:"APIs eliminate repetitive manual tasks and replace them with automation, enabling more efficient and consistent IT operations."},
+  {q:"Which TWO statements are true about characteristics of stateless applications? (Choose two.)",o:["They must run on container orchestrators like Kubernetes.","They can be freely scaled across available capacity without disrupting ongoing customer connections.","They can be scaled only by redeploying them and destroying the data that users previously needed.","They maintain the user state within the local user machine so that automation can work non-destructively.","They can store a user state in an accessible database separate from application servers and other components."],c:[1,4],m:1,e:"Stateless applications can be freely scaled without disrupting connections, and user state can be stored in an external database separate from the application servers."},
+  {q:"What is a characteristic of the continuous integration (CI) component of the CI/CD philosophy?",o:["Code changes are continually merged with the main branch of the application, so change sets are small.","Code changes are tested and integrated with the main branch then tested again before they are deployed into production.","Code is constantly deployed into production where users serve as the final testers.","Application development is performed in short sprints so that enough code is always in a deployable state."],c:0,e:"CI involves continually merging code changes with the main branch, keeping change sets small and making it easier to identify and fix issues."},
+  {q:"A packet is received by a server. The packet has a destination port number of 53. What protocol or service is requested?",o:["DNS","NetBIOS (NetBT)","POP3","IMAP"],c:0,e:"Port 53 is the standard port for DNS (Domain Name System)."},
+  {q:"Which statement accurately describes dynamic NAT?",o:["It always maps a private IP address to a public IP address.","It provides an automated mapping of inside local to inside global IP addresses.","It provides a mapping of internal host names to IP addresses.","It dynamically provides IP addressing to internal hosts."],c:1,e:"Dynamic NAT provides an automated dynamic mapping of inside local (private) to inside global (public) IP addresses from a configured pool."},
+  {q:"A packet is received by a server. The packet has a destination port number of 830. What protocol or service is requested?",o:["NTP","DHCP","NETCONF","HTTPS"],c:2,e:"NETCONF by default runs on TCP port 830 using SSH as the transport."},
+  {q:"Which programming language is supported by the Webex xAPI to develop macros for on-device customization?",o:["Java","Python","JavaScript","C++"],c:2,e:"Cisco Webex devices support JavaScript for developing macros for on-device customization through xAPI."},
+  {q:"Which Cisco management system is designed as the solution for Software-Defined Networking and runs on Nexus 9000 hardware?",o:["Application Centric Infrastructure platform (ACI)","IOS XE","Nexus Operating System (NX-OS)","DNA Center"],c:0,e:"Cisco ACI is the SDN solution for data centers, running on the Nexus 9000 series hardware with the APIC controller."},
+  {q:"A developer issues the Linux command 'python3 -m venv devenv'. What is the developer trying to achieve?",o:["To install the devnet tool sets in the Python 3 virtual environment named venv.","To create a Python 3 virtual environment named devenv.","To activate the Python 3 virtual environment named devenv.","To enter the Python 3 virtual environment named venv using the devnet tool sets."],c:1,e:"The syntax 'python3 -m venv <name>' creates a new Python 3 virtual environment. Here 'devenv' is the environment name."},
+  {q:"Two network engineers discuss switch forwarding methods. What is an important concept related to the cut-through method of switching?",o:["Fragment-free switching offers the lowest level of latency.","Fast-forward switching can be viewed as a compromise between store-and-forward switching and fragment-free switching.","Fragment-free switching is the typical cut-through method of switching.","Packets can be relayed with errors when fast-forward switching is used."],c:3,e:"Fast-forward (cut-through) switching starts forwarding before the entire packet is received, offering lowest latency but meaning packets may sometimes be relayed with errors."},
+  {q:"When thinking about the functional planes of a network, what is unique about the control plane?",o:["It forwards data through a network device.","It manipulates data and outputs it in the XML format.","It includes the SNMP protocol.","It includes applications and protocols used between network devices such as routers."],c:3,e:"The control plane processes traffic required to maintain network functionality, including routing protocols like OSPF, BGP, and EIGRP. It processes data in software."},
+  {q:"When thinking about the functional planes of a network, what is unique about the management plane?",o:["It forwards data based on STP settings.","It is responsible for the switching of packets in hardware.","It includes protocols used to monitor network devices.","It includes applications and protocols used between network devices such as routers."],c:2,e:"The management plane manages traffic destined for the network device itself — protocols like SSH and SNMP for monitoring and managing devices."},
+  {q:"Which Lean software development characteristic describes a process adapted from manufacturing?",o:["A process that was developed for manufacturing, but adapted to other industries.","A software development process where a particular phase depends on the results of the previous phase.","A software development process that can only go forward.","A software development method that tracks closely with the software development life cycle."],c:0,e:"Lean was originally developed for manufacturing (Toyota Production System) and was later adapted to software development and other industries."},
+  {q:"Which scenario exhibits the 'social proof' principle of human influence?",o:["A user receives a phone call from someone claiming to be from IT who needs to verify user credentials.","A user visits a web site offering a free gift if the user provides contact information.","A user opens an email advertising a free trial on a website that is only available for a few hours.","A user completes a survey requesting personal information after seeing co-workers completing the survey."],c:3,e:"Social proof is the tendency to follow the actions of others. Following coworkers in completing a survey is a classic example."},
+  {q:"Which SQL injection defense method should be used only as a last resort?",o:["Escaping all user-supplied input.","Using a database firewall.","Implementing whitelist input validation.","Using parameterized queries."],c:0,e:"Escaping all user-supplied input should only be used as a last resort because it is error-prone. Parameterized queries and whitelist validation are preferred defenses."},
+  {q:"Which type of ISE node provides network access, posturing, guest access, client provisioning, and profiling services?",o:["Monitoring","Administration","pxGrid","Policy service"],c:3,e:"The Policy Service node in Cisco ISE provides network access, posture assessment, guest access, client provisioning, and profiling services."},
+  {q:"Which communication protocol does Ansible use to connect to remote devices?",o:["Telnet over VPN","HTTPS","Secure FTP","SSH"],c:3,e:"Ansible communicates with remote machines over SSH. By default, it uses native OpenSSH and connects using the current user name."},
+  {q:"Which statement describes a stateful firewall?",o:["It can filter packets based on information at Layers 3, 4, 5 and 7 of the OSI model.","It can determine if the connection is in the initiation, data transfer, or termination phase.","It can only filter packets based on limited Layer 3 and 4 information.","It can expand the number of IP addresses available and can hide network addressing design."],c:1,e:"A stateful firewall tracks the state of network connections and can determine if a connection is in the initiation, data transfer, or termination phase."},
+  {q:"A software development company uses the Lean method. What is a characteristic of this method?",o:["A process that eliminates inefficient ways of working like expecting coders to multitask.","A software development process that focuses on frequent delivery of working software as well as collaboration.","A software development process that has the results of one phase feed into the next phase.","A software development process that can only go forward."],c:0,e:"Lean eliminates waste and inefficiency, including multitasking. It focuses on amplifying learning and delivering as fast as possible with high quality."},
+  {q:"Which of the following is a valid URI to query the MapQuest API for a route from New York, NY to Boston, MA?",o:["https://www.mapquestapi.com/directions/v2/route?key=key&from=New+York+NY&to=Boston+MA","https://www.mapquestapi.com/directions/v2/route?key==key&from==New+York%2C+NY&to==Boston%2C+MA","https://www.mapquestapi.com/directions/v2/route?key:key&from:New+York%2C+NY&to:Boston%2C+MA","https://www.mapquestapi.com/directions/v2/route?key= key&from=New+York%2C+NY&to=Boston%2C+MA"],c:0,e:"Valid REST URIs use a single '=' to assign query parameter values and '+' to encode spaces. Option A uses the correct format with single equals signs and proper encoding."},
+  {q:"A packet is received by a server. The packet has a destination port number of 123. What protocol or service is requested?",o:["DNS","SSH","NTP","RESTCONF"],c:2,e:"Port 123 is the standard port for NTP (Network Time Protocol), used to synchronize clocks across network devices."},
+  {q:"PC1 needs to resolve the host name of a web server into an IP address by using DNS. The DNS server has IP 192.168.20.3. What destination IP address and destination port number will PC1 assign to the DNS query packet?",o:["192.168.20.2 port 80","192.168.20.3 port 53","192.168.20.3 port 80","192.168.10.1 port 53"],c:1,e:"DNS queries are sent to the DNS server's IP address using destination port 53, the standard DNS port."},
+  {q:"A network administrator is assigned the 172.16.0.0/24 block of addresses. The administrator submits this design: 172.16.0.0/26, 172.16.0.64/27, 172.16.0.96/26, 172.16.0.128/27. What should the senior network engineer's response be?",o:["This design is flawed because the 172.16.0.128/27 network number is invalid.","This design will work for the branch office.","This design is flawed because no design could have two networks that use a /26 mask and are not consecutive blocks of addresses.","This design is flawed because the 172.16.0.96/26 network is not a valid block of addresses.","This design is flawed because the 172.16.0.96/26 network overlaps with other addresses."],c:4,e:"Valid /26 blocks are 172.16.0.0/26, 172.16.0.64/26, 172.16.0.128/26, and 172.16.0.192/26. The 172.16.0.96/26 block is invalid and overlaps with other addresses."},
+  {q:"Which TWO forums are available on the Cisco Developer Community? (Choose two.)",o:["Developer Security and Developer Analytics","Developer Hardware and Developer Finance","Developer Mobility and Developer Analytics and Automation","Developer Internet of Things and Developer Human Resources"],c:2,e:"The Cisco Developer Community includes forums such as Developer Networking, Security, Data Center, Internet of Things, Cloud, Mobility, and Analytics and Automation, among others."},
+  {q:"If PC1 is communicating with a web server on the Internet, which TWO TCP/IP layers are responsible for encapsulating the message that requests data from that particular server and assigning a source port number? (Choose two.)",o:["Session","Network","Transport","Physical","Application"],c:[2,4],m:1,e:"The Application layer creates the request/message content, and the Transport layer encapsulates it with TCP/UDP headers including source and destination port numbers."},
+  {q:"Match the DHCP message type with its purpose. Which DHCP message is used to locate any available DHCP server on a network?",o:["DHCPACK","DHCPOFFER","DHCPREQUEST","DHCPDISCOVER"],c:3,e:"DHCPDISCOVER is a broadcast message sent by a client to locate any available DHCP server on the network. DHCPOFFER is the server's response. DHCPREQUEST selects a specific offer. DHCPACK confirms the lease."},
+  {q:"Which load balancer technique diverts a small amount of traffic to a new production environment that is being changed?",o:["Blue-green","Round robin","Canary","Sticky session"],c:2,e:"Canary deployment diverts a small amount of traffic to a new production environment to test changes before rolling them out to all users."},
+  {q:"Which load balancer technique sends traffic to a new environment, but keeps the old environment ready in case of issues?",o:["Canary","Round robin","Sticky session","Blue-green"],c:3,e:"Blue-green deployment sends all traffic to a new (green) environment while keeping the old (blue) environment ready in case of rollback."},
+  {q:"Which load balancer technique sends requests to the next server on the list?",o:["Canary","Blue-green","Round robin","Sticky session"],c:2,e:"Round robin load balancing distributes requests sequentially to each server on the list, cycling back to the first server after the last."},
+  {q:"A network engineer has created a Jenkins pipeline. Which menu option would the engineer use to run the pipeline?",o:["Configure","Changes","Build Now","Workspace"],c:2,e:"In Jenkins, 'Build Now' is the option used to manually trigger (run) a pipeline or build job."},
+  {q:"A network engineer is configuring a Jenkins job with a script that has a 'preparation' stage. What is the purpose of the preparation stage?",o:["It makes sure that any previous instances of a particular Docker container are stopped and removed.","It catches and removes any errors.","It runs the SUCCESS Docker container.","It places a log of any errors in the SUCCESS file."],c:0,e:"The preparation stage in a Jenkins pipeline is typically used to ensure a clean starting environment — stopping and removing any previous Docker container instances before the build begins."},
+  {q:"In a Python script authenticating to Cisco NSO (Network Services Orchestrator) with username 'superadmin' and password 'soverysecure!', which Python library is used to make the HTTP request?",o:["json","os","requests","subprocess"],c:2,e:"The 'requests' library is the standard Python library for making HTTP requests to REST APIs including Cisco NSO."},
+  {q:"In a Python script authenticating to Cisco DNA Center to obtain an authentication token, what is used as the 'auth' parameter in the requests call?",o:["The IP address and port number","A tuple containing username and password","A dictionary with the token key","An encoded base64 string of the URL"],c:1,e:"In the Python requests library, the 'auth' parameter accepts a tuple of (username, password) to handle HTTP Basic Authentication, which is how Cisco DNA Center authentication works."},
+  {q:"A Python script authenticates to Cisco DNA Center using username 'secureuser' and password 'C1$c0'. What is assigned to the 'password' component in the auth parameter?",o:["secureuser","C1$c0","adminuser","Sup3rC1$c0"],c:1,e:"The password component of the auth tuple contains the actual password — in this case 'C1$c0' for the user 'secureuser'."},
+  {q:"In a Python script that interacts with Webex Teams rooms API to delete all previous demo rooms, create a new demo room, enroll members, and post a message — which HTTP method is used to delete rooms?",o:["POST","GET","DELETE","PUT"],c:2,e:"The HTTP DELETE method is used to delete resources (such as Webex Teams rooms). This maps to the DELETE function in CRUD."},
+  {q:"In a Python script that interacts with Webex Teams rooms API, which HTTP method is used to create a new room?",o:["DELETE","GET","PUT","POST"],c:3,e:"The HTTP POST method is used to create new resources (such as Webex Teams rooms). This maps to the CREATE function in CRUD."},
+  {q:"In a Python script that interacts with Webex Teams, which API endpoint is used to add members to a room?",o:["rooms","messages","memberships","people"],c:2,e:"The 'memberships' API endpoint in Webex Teams is used to add (enroll) members to a room."},
+  {q:"In a Python script that interacts with Webex Teams, which component is used to post a text message to a room?",o:["roomId","memberships","text","title"],c:2,e:"The 'text' component/parameter is used in the Webex Teams Messages API to specify the content of a message to be posted to a room."},
+  {q:"In a Python script for the APIC-EM REST API request for the user 'secureuser', which Python library is used to make the HTTP request?",o:["json","requests","os","subprocess"],c:1,e:"The 'requests' library is the standard Python library for making HTTP requests to REST APIs such as Cisco APIC-EM."},
+  {q:"In a Python script that makes a REST API request to Cisco DNA Center, what does the 'verify=False' parameter do?",o:["It enables SSL certificate verification.","It disables SSL certificate verification (SSL handshake).","It verifies the username and password.","It enables verbose debug output."],c:1,e:"'verify=False' in the Python requests library disables SSL certificate verification, often used in lab environments with self-signed certificates."},
+  {q:"In a Python script that makes a REST API request, what does the 'content-type':'application/json' header value specify?",o:["It defines the API authentication token.","It identifies the destination URL.","It identifies the request data format as JSON.","It disables SSL verification."],c:2,e:"The 'content-type':'application/json' header tells the server that the body of the request is formatted as JSON."},
+  {q:"In a Python script that makes a REST API request, what does 'X-Auth-Token':ticket specify?",o:["It identifies the request data format.","It disables SSL handshake.","It defines API authentication by passing the auth token.","It identifies the API endpoint to be called."],c:2,e:"The 'X-Auth-Token' header is used for API authentication by passing the previously obtained authentication token (ticket) with each request."},
+  {q:"In a Python script that makes a REST API request, what does str(resp.status_code) do?",o:["It stops the program execution.","It converts the status code data format from integer to string.","It identifies the API to be called.","It defines API authentication."],c:1,e:"str(resp.status_code) converts the HTTP status code (an integer) to a string data format, often used for string concatenation in print statements or logging."},
+  {q:"In a Python script that makes a REST API request, what does sys.exit() do?",o:["It converts data format.","It identifies the API to be called.","It defines API authentication.","It stops the program execution."],c:3,e:"sys.exit() stops/terminates the program execution. It is commonly used in error handling to exit the script when an error condition is encountered."},
+  {q:"Which HTTP status code category is used to indicate a successful REST API response?",o:["1xx","2xx","3xx","4xx","5xx"],c:1,e:"2xx Success responses indicate the request was successfully received, understood, and accepted. For example, 200 OK and 201 Created."},
+  {q:"A Python script for a REST API URL contains the path 'api/v1/host'. What does this component identify?",o:["The authentication token","The SSL certificate","The API endpoint to be called","The request data format"],c:2,e:"The path component 'api/v1/host' in a REST API URL identifies the specific API endpoint (resource) to be called on the server."},
+];
+
+let cur=0, ans=new Array(Q.length).fill(null), chk=new Array(Q.length).fill(false);
+
+function startQuiz(){document.getElementById('start-screen').style.display='none';document.getElementById('quiz-screen').style.display='block';buildNav();render();}
+function buildNav(){const n=document.getElementById('jump-nav');n.innerHTML='';Q.forEach((_,i)=>{const b=document.createElement('button');b.className='jump-btn';b.textContent=i+1;b.onclick=()=>{cur=i;render();window.scrollTo({top:0,behavior:'smooth'});};n.appendChild(b);});}
+function updNav(){document.querySelectorAll('.jump-btn').forEach((b,i)=>{b.className='jump-btn';if(i===cur)b.classList.add('active');else if(chk[i])b.classList.add(ok(i)?'done-correct':'done-wrong');});}
+function ok(i){const q=Q[i],a=ans[i];if(a===null)return false;if(q.m)return[...a].sort().join()===[...q.c].sort().join();return a===q.c;}
+
+function render(){
+  const q=Q[cur],L=['A','B','C','D','E','F'];
+  document.getElementById('q-num').textContent=`QUESTION ${String(cur+1).padStart(2,'0')}`;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-counter').textContent=`Question ${cur+1} of ${Q.length}`;
+  document.getElementById('multi-badge').style.display=q.m?'inline-flex':'none';
+  const done=chk.filter(Boolean).length,corr=chk.filter((_,i)=>_&&ok(i)).length;
+  document.getElementById('q-score-live').textContent=`Score: ${corr}/${done}`;
+  document.getElementById('progress-fill').style.width=((cur+1)/Q.length*100)+'%';
+  const oc=document.getElementById('options');oc.innerHTML='';
+  q.o.forEach((opt,i)=>{const b=document.createElement('button');b.className='option';b.dataset.idx=i;b.innerHTML=`<span class="option-letter">${L[i]}</span><span>${opt}</span>`;b.onclick=()=>sel(i);oc.appendChild(b);});
+  const exp=document.getElementById('explanation');exp.className='explanation';exp.innerHTML='';
+  if(chk[cur]){applyChk();document.getElementById('btn-check').style.display='none';}
+  else{
+    document.getElementById('btn-check').style.display='inline-block';
+    if(ans[cur]!==null){if(q.m)ans[cur].forEach(i=>oc.children[i].classList.add('selected'));else oc.children[ans[cur]].classList.add('selected');}
+    document.getElementById('btn-check').disabled=ans[cur]===null||(q.m&&ans[cur]?.length===0);
+  }
+  document.getElementById('btn-prev').disabled=cur===0;
+  document.getElementById('btn-next').textContent=cur===Q.length-1?'Finish →':'Next →';
+  updNav();
+}
+
+function sel(i){
+  if(chk[cur])return;const q=Q[cur];
+  if(q.m){if(!ans[cur])ans[cur]=[];const p=ans[cur].indexOf(i);p===-1?ans[cur].push(i):ans[cur].splice(p,1);
+    document.querySelectorAll('.option').forEach((o,j)=>o.classList.toggle('selected',ans[cur].includes(j)));
+    document.getElementById('btn-check').disabled=ans[cur].length===0;
+  }else{ans[cur]=i;document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));document.querySelectorAll('.option')[i].classList.add('selected');document.getElementById('btn-check').disabled=false;}
+}
+
+function checkAnswer(){
+  const a=ans[cur];if(a===null||(Array.isArray(a)&&a.length===0))return;
+  chk[cur]=true;applyChk();document.getElementById('btn-check').style.display='none';
+  const done=chk.filter(Boolean).length,corr=chk.filter((_,i)=>_&&ok(i)).length;
+  document.getElementById('q-score-live').textContent=`Score: ${corr}/${done}`;updNav();
+}
+
+function applyChk(){
+  const q=Q[cur],opts=document.querySelectorAll('.option');
+  opts.forEach(o=>o.classList.add('disabled'));
+  const cs=new Set(q.m?q.c:[q.c]),ss=new Set(q.m?(ans[cur]||[]):(ans[cur]!==null?[ans[cur]]:[]));
+  opts.forEach((o,i)=>{if(cs.has(i))o.classList.add('correct');else if(ss.has(i))o.classList.add('wrong');});
+  const exp=document.getElementById('explanation');exp.innerHTML=`<strong>ℹ Explanation:</strong> ${q.e}`;exp.classList.add('show');
+}
+
+function nextQ(){if(cur<Q.length-1){cur++;render();document.getElementById('question-card').scrollIntoView({behavior:'smooth',block:'start'});}else showResults();}
+function prevQ(){if(cur>0){cur--;render();}}
+
+function showResults(){
+  document.getElementById('quiz-screen').style.display='none';
+  const rs=document.getElementById('results-screen');rs.style.display='block';
+  const total=Q.length,correct=chk.filter((_,i)=>_&&ok(i)).length,wrong=chk.filter((_,i)=>_&&!ok(i)).length,skipped=total-chk.filter(Boolean).length,pct=Math.round(correct/total*100);
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('stat-correct').textContent=correct;document.getElementById('stat-wrong').textContent=wrong;
+  document.getElementById('stat-skipped').textContent=skipped;document.getElementById('stat-total').textContent=total;
+  const ring=document.getElementById('ring-fill');
+  let gc,gm,gc2;
+  if(pct>=90){gc='🏆 PASS — Outstanding!';gm='Excellent! You are fully prepared for the DevNet Associate exam.';gc2='#ffd700';}
+  else if(pct>=80){gc='✅ PASS — Great Job!';gm="Strong result! A bit more review and you're fully exam-ready.";gc2='#00e676';}
+  else if(pct>=70){gc='⚠️ BORDERLINE';gm='Almost there. Focus on the topics you missed and try again.';gc2='#ffa500';}
+  else{gc='❌ NEEDS MORE STUDY';gm="Don't give up — review the explanations carefully and retake the quiz.";gc2='#ff4757';}
+  const g=document.getElementById('grade-badge');g.textContent=gc;g.style.cssText=`background:${gc2}22;border:1px solid ${gc2};color:${gc2};`;
+  document.getElementById('grade-msg').textContent=gm;
+  ring.style.stroke=pct>=80?'#00e676':pct>=70?'#ffa500':'#ff4757';
+  setTimeout(()=>{ring.style.strokeDashoffset=502*(1-pct/100);},200);
+  const rev=document.getElementById('review-section');rev.innerHTML='<div class="review-title"><span>📋</span> Full Answer Review</div>';
+  const L=['A','B','C','D','E','F'];
+  Q.forEach((q,i)=>{
+    const c=chk[i]&&ok(i),div=document.createElement('div');
+    div.className='review-item '+(chk[i]?(c?'correct-item':'wrong-item'):'');
+    const icon=!chk[i]?'⏭':c?'✓':'✗',ic=!chk[i]?'var(--muted)':c?'var(--green)':'var(--red)';
+    let ah='<div class="review-answers">';
+    if(!chk[i])ah+=`<div style="color:var(--muted)">⏭ Skipped / not checked</div>`;
+    else if(!c){const ya=q.m?(ans[i]||[]).map(x=>`${L[x]}. ${q.o[x]}`).join(' | '):(ans[i]!==null?`${L[ans[i]]}. ${q.o[ans[i]]}`:'None');ah+=`<div class="review-your">✗ Your answer: ${ya}</div>`;}
+    const ca=q.m?q.c.map(x=>`${L[x]}. ${q.o[x]}`).join(' | '):`${L[q.c]}. ${q.o[q.c]}`;
+    ah+=`<div class="review-correct-ans">✓ Correct: ${ca}</div><div class="review-exp">${q.e}</div></div>`;
+    div.innerHTML=`<div class="review-q"><span style="color:${ic}">${icon}</span> Q${i+1}. ${q.q}</div>${ah}`;rev.appendChild(div);
+  });
+  rs.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function restartQuiz(){
+  cur=0;ans=new Array(Q.length).fill(null);chk=new Array(Q.length).fill(false);
+  document.getElementById('results-screen').style.display='none';document.getElementById('quiz-screen').style.display='block';
+  buildNav();render();window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>

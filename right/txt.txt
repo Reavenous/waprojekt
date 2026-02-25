@@ -1,0 +1,48 @@
+Odpověď Gemini
+
+Ahoj Hrot Bagr! Jasná věc, tohle zvládneme. Připravil jsem pro tebe kódy, které jsou co nejjednodušší na pochopení, ale zároveň splňují všechny ty záludnosti ze zadání (filtrování, mazání, správný load balancing). Jméno v databázi jsem ti předvyplnil přesně podle tvých představ.
+
+Tady je kompletní kuchařka krok za krokem, jak si to celé rozběhat a otestovat na svém počítači.
+1. Příprava a instalace (Kuchařka)
+
+Než spustíme samotné servery, musíme si vytvořit složku a stáhnout potřebné knihovny. Otevři si příkazovou řádku (Terminál / CMD) a postupuj takto:
+
+    Vytvoř si novou složku pro projekt (např. sanitace) a vlez do ní.
+
+    Nainstaluj knihovny pro Python: V terminálu spusť příkaz:
+    pip install flask requests
+
+    Nainstaluj knihovny pro JavaScript: V terminálu (ve stejné složce) spusť postupně:
+    npm init -y
+    npm install express
+
+
+    3. Jak to spustit a otestovat
+
+Musíš si otevřít tři samostatná okna příkazové řádky (ve všech musíš být ve své složce s projektem):
+
+    V prvním okně spusť: python server1.py
+
+    Ve druhém okně spusť: node server2.js
+
+    Ve třetím okně spusť: python router.py
+
+A teď si otevři čtvrté okno (nebo si zapni jiný terminál) a zadej přesně ty příkazy, co máš v zadání u zkoušky. Schválně to zkoušej vícekrát za sebou a sleduj tu hlavičku X-Server-ID, jak se střídá (1, 1, 2, 2, 2).
+
+    Test získání všech záznamů: 
+    curl -i http://localhost:8000/protocols
+
+    Test filtrování (vrátí jen ty dokončené): 
+    curl -i "http://localhost:8000/protocols?status=completed"
+
+    Test smazání záznamu: 
+    curl -i -X DELETE http://localhost:8000/protocols/1
+
+Máš chuť zkusit to teď nahodit u sebe na počítači a dáš mi vědět, jestli se ti podařilo servery bez chyb spustit?
+
+
+curl.exe -i http://localhost:8000/protocols
+
+curl.exe -i "http://localhost:8000/protocols?status=completed"
+
+curl.exe -i -X DELETE http://localhost:8000/protocols/1

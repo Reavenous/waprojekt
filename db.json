@@ -1,0 +1,32 @@
+{
+  "animals": [
+    {
+      "id": 1,
+      "species": "kráva",
+      "breed": "Jerseyská",
+      "birthDate": "2022-03-15",
+      "registered": true
+    },
+    {
+      "id": 2,
+      "species": "prase",
+      "breed": "Přeštické černostrakaté",
+      "birthDate": "2023-01-20",
+      "registered": true
+    },
+    {
+      "id": 3,
+      "species": "ovce",
+      "breed": "Šumavská",
+      "birthDate": "2023-04-10",
+      "registered": false
+    },
+    {
+      "id": 4,
+      "species": "koza",
+      "breed": "Bílá krátkosrstá",
+      "birthDate": "2022-11-05",
+      "registered": true
+    }
+  ]
+}
