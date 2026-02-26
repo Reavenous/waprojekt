@@ -1,0 +1,392 @@
+================================================================================
+  EXAM REFERENCE - Sanitace kanálů (Sewer Sanitation REST API)
+  Architecture: Client -> Router (8000) -> Server1 Python (8001) / Server2 JS (8002)
+================================================================================
+
+
+================================================================================
+  db.json
+  -------
+  TASK: This is the shared "database" file. Both servers read from and write to
+  this file. It stores all protocol records. You may need to create this file
+  with some starting data before running the servers.
+================================================================================
+
+{
+  "protocols": [
+    {
+      "id": 1,
+      "section_code": "KAN-A7-012",   // unique code of the sewer section
+      "street": "Vodickova",           // street name
+      "district": "Praha 1",           // city district
+      "length_m": 145,                 // length of section in meters
+      "sanitation_type": "pressure",   // pressure / mechanical / camera / chemical
+      "status": "completed",           // completed / pending / blocked / needs_repair
+      "technician": "Jan Novak",       // name of technician (can be null)
+      "date": "2026-01-15",            // date of sanitation YYYY-MM-DD (can be null)
+      "notes": "Nalezen mensi korenovy narust"  // notes (can be null)
+    }
+  ]
+}
+
+
+================================================================================
+  server1.py
+  ----------
+  TASK: Implement ALL required REST API endpoints [30 pts]
+    - GET  /protocols          -> return all records
+    - GET  /protocols?status=X -> return records filtered by status
+    - GET  /protocols/<id>     -> return single record by ID (404 if missing)
+    - POST /protocols          -> create new record (ignore incoming id, generate own)
+    - DELETE /protocols/<id>   -> delete record (204 on success, 404 if missing)
+  Every response MUST include header: X-Server-ID: 1
+================================================================================
+
+"""
+Server 1 - Python Flask
+Port: 8001
+"""
+
+from flask import Flask, jsonify, request
+import json
+
+app = Flask(__name__)
+
+# -- HELPERS ------------------------------------------------------------------
+
+def load_data():
+    # Read db.json and return it as a Python dict
+    with open('db.json', 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+def save_data(data):
+    # Write updated dict back to db.json
+    with open('db.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+# -- ROUTES -------------------------------------------------------------------
+
+# TASK: GET all protocols, with optional ?status=X filtering
+@app.route('/protocols', methods=['GET'])
+def get_all():
+    data = load_data()
+    records = data['protocols']
+
+    # If ?status=X was passed in the URL, filter the list
+    status_filter = request.args.get('status')
+    if status_filter:
+        records = [r for r in records if r.get('status') == status_filter]
+
+    response = jsonify({"protocols": records, "server": 1})
+    response.headers['X-Server-ID'] = '1'   # REQUIRED on every response!
+    return response
+
+
+# TASK: GET single protocol by ID, return 404 if not found
+@app.route('/protocols/<int:id>', methods=['GET'])
+def get_one(id):
+    data = load_data()
+
+    # Find first record where id matches, or None if not found
+    record = next((r for r in data['protocols'] if r['id'] == id), None)
+
+    if record is None:
+        response = jsonify({"error": "Not found"})
+        response.headers['X-Server-ID'] = '1'
+        return response, 404
+
+    response = jsonify(record)
+    response.headers['X-Server-ID'] = '1'
+    return response
+
+
+# TASK: POST create new protocol
+# IMPORTANT: ignore any 'id' in the request body, always generate a new one!
+@app.route('/protocols', methods=['POST'])
+def create():
+    data = load_data()
+    new_record = request.json  # parse the JSON body sent by client
+
+    # Generate new ID: find the highest existing ID and add 1
+    # If list is empty, start from 1
+    new_record['id'] = max((r['id'] for r in data['protocols']), default=0) + 1
+
+    data['protocols'].append(new_record)
+    save_data(data)
+
+    response = jsonify({**new_record, "server": 1})
+    response.headers['X-Server-ID'] = '1'
+    return response, 201  # 201 = Created
+
+
+# TASK: DELETE protocol by ID
+# Return 204 No Content on success, 404 if record does not exist
+@app.route('/protocols/<int:id>', methods=['DELETE'])
+def delete(id):
+    data = load_data()
+    original_len = len(data['protocols'])
+
+    # Keep all records EXCEPT the one with matching id
+    data['protocols'] = [r for r in data['protocols'] if r['id'] != id]
+
+    if len(data['protocols']) == original_len:
+        # List length unchanged = nothing was deleted = record not found
+        response = jsonify({"error": "Not found"})
+        response.headers['X-Server-ID'] = '1'
+        return response, 404
+
+    save_data(data)
+
+    # 204 No Content = success but no body to return
+    response = app.response_class(status=204)
+    response.headers['X-Server-ID'] = '1'
+    return response
+
+
+# -- START --------------------------------------------------------------------
+
+if __name__ == '__main__':
+    app.run(port=8001, debug=True)   # DO NOT change the port!
+
+
+================================================================================
+  server2.js
+  ----------
+  TASK: Check and fix any errors in the existing code. Add missing functionality
+  [30 pts]:
+    - GET  /protocols          -> return all records
+    - GET  /protocols?status=X -> return records filtered by status  (MISSING)
+    - GET  /protocols/<id>     -> return single record by ID (404 if missing)
+    - POST /protocols          -> create new record (ignore incoming id, generate own)
+    - DELETE /protocols/<id>   -> delete record (204 on success, 404 if missing) (MISSING)
+  Every response MUST include header: X-Server-ID: 2
+================================================================================
+
+/**
+ * Server 2 - Express.js
+ * Port: 8002
+ */
+
+const express = require('express');
+const fs = require('fs');
+
+const app = express();
+app.use(express.json());  // middleware: allows reading JSON from request body
+
+// -- HELPERS ------------------------------------------------------------------
+
+function loadData() {
+    // Read and parse db.json
+    return JSON.parse(fs.readFileSync('db.json', 'utf-8'));
+}
+
+function saveData(data) {
+    // Write data back to db.json
+    fs.writeFileSync('db.json', JSON.stringify(data, null, 2));
+}
+
+// -- ROUTES -------------------------------------------------------------------
+
+// TASK: GET all protocols, with optional ?status=X filtering
+app.get('/protocols', (req, res) => {
+    const data = loadData();
+    let records = data.protocols;
+
+    // If ?status=X was passed in the URL, filter the list
+    const statusFilter = req.query.status;
+    if (statusFilter) {
+        records = records.filter(r => r.status === statusFilter);
+    }
+
+    res.set('X-Server-ID', '2');   // REQUIRED on every response!
+    res.status(200).json({ protocols: records, server: 2 });
+});
+
+
+// TASK: GET single protocol by ID, 404 if not found
+app.get('/protocols/:id', (req, res) => {
+    const data = loadData();
+    const id = parseInt(req.params.id);  // URL params are strings, convert to number
+    const record = data.protocols.find(r => r.id === id);
+
+    res.set('X-Server-ID', '2');
+
+    if (!record) {
+        return res.status(404).json({ error: 'Not found' });
+    }
+
+    res.status(200).json(record);
+});
+
+
+// TASK: POST create new protocol
+// IMPORTANT: ignore any 'id' in the request body, always generate a new one!
+app.post('/protocols', (req, res) => {
+    const data = loadData();
+    const newRecord = req.body;  // parsed JSON body from client
+
+    // Generate new ID: find highest existing ID and add 1
+    const maxId = data.protocols.reduce((max, r) => Math.max(max, r.id), 0);
+    newRecord.id = maxId + 1;
+
+    data.protocols.push(newRecord);
+    saveData(data);
+
+    res.set('X-Server-ID', '2');
+    res.status(201).json({ ...newRecord, server: 2 });  // 201 = Created
+});
+
+
+// TASK: DELETE protocol by ID
+// Return 204 No Content on success, 404 if not found
+app.delete('/protocols/:id', (req, res) => {
+    const data = loadData();
+    const id = parseInt(req.params.id);
+    const index = data.protocols.findIndex(r => r.id === id);
+
+    res.set('X-Server-ID', '2');
+
+    if (index === -1) {
+        // findIndex returns -1 if nothing found
+        return res.status(404).json({ error: 'Not found' });
+    }
+
+    data.protocols.splice(index, 1);  // remove 1 element at found index
+    saveData(data);
+
+    res.status(204).send();  // 204 No Content = success, empty body
+});
+
+
+// -- START --------------------------------------------------------------------
+
+app.listen(8002, () => {
+    console.log('Server 2 (JS) running on port 8002');  // DO NOT change the port!
+});
+
+
+================================================================================
+  router.py
+  ---------
+  TASK: Implement Ratio 2:3 load balancing [40 pts]
+    - Every request from client comes here first
+    - Forward to Server1 (Python) or Server2 (JS) based on sequence:
+      PY, PY, JS, JS, JS, PY, PY, JS, JS, JS, ... (repeating forever)
+    - Must support ALL HTTP methods: GET, POST, DELETE
+    - Must forward query parameters (?status=X)
+    - Must forward request body (for POST)
+    - Must pass X-Server-ID header from backend back to client
+================================================================================
+
+"""
+Router - Load Balancer
+Port: 8000
+"""
+
+from flask import Flask, request, Response
+import requests  # used to forward HTTP requests to backend servers
+
+app = Flask(__name__)
+
+# -- LOAD BALANCING SETUP -----------------------------------------------------
+
+counter = 0  # counts every incoming request, never resets
+
+# The 2:3 sequence: positions 0,1 = Python | positions 2,3,4 = JavaScript
+# counter % 5 cycles through 0,1,2,3,4,0,1,2,3,4,...
+SEQUENCE = ['py', 'py', 'js', 'js', 'js']
+
+SERVER_URLS = {
+    'py': 'http://localhost:8001',  # Server 1 Python
+    'js': 'http://localhost:8002'   # Server 2 JavaScript
+}
+
+def get_target_url():
+    """Pick next server based on current counter position in the sequence"""
+    global counter
+    target = SEQUENCE[counter % 5]  # 0->py, 1->py, 2->js, 3->js, 4->js, 5->py...
+    counter += 1
+    return SERVER_URLS[target]
+
+
+# -- FORWARD HELPER -----------------------------------------------------------
+
+def forward_request(path):
+    """
+    Forward the incoming request to the selected backend server.
+    Preserves: HTTP method, path, query params, JSON body, response headers.
+    """
+    base_url = get_target_url()
+    url = base_url + path  # e.g. http://localhost:8001/protocols
+
+    # Forward the request to the backend server
+    resp = requests.request(
+        method=request.method,                  # GET / POST / DELETE
+        url=url,
+        params=request.args,                    # forward ?status=X etc.
+        json=request.get_json(silent=True),     # forward JSON body (None if no body)
+        headers={'Content-Type': 'application/json'}
+    )
+
+    # Build response to send back to the client
+    response = Response(
+        resp.content,            # raw response body (bytes)
+        status=resp.status_code  # pass through the status code (200/201/204/404)
+    )
+
+    # Copy Content-Type header from backend response
+    if 'Content-Type' in resp.headers:
+        response.headers['Content-Type'] = resp.headers['Content-Type']
+
+    # IMPORTANT: copy X-Server-ID header so client knows which server responded
+    if 'X-Server-ID' in resp.headers:
+        response.headers['X-Server-ID'] = resp.headers['X-Server-ID']
+
+    return response
+
+
+# -- ROUTES -------------------------------------------------------------------
+
+# TASK: Catch GET and POST on /protocols and forward to backend
+@app.route('/protocols', methods=['GET', 'POST'])
+def handle_collection():
+    return forward_request('/protocols')
+
+# TASK: Catch GET and DELETE on /protocols/<id> and forward to backend
+@app.route('/protocols/<int:id>', methods=['GET', 'DELETE'])
+def handle_single(id):
+    return forward_request(f'/protocols/{id}')
+
+
+# -- START --------------------------------------------------------------------
+
+if __name__ == '__main__':
+    app.run(port=8000, debug=True)   # DO NOT change the port!
+
+
+================================================================================
+  QUICK CHEAT SHEET
+================================================================================
+
+RULE                                       DETAIL
+-----------------------------------------  ------------------------------------
+Header on EVERY response                   X-Server-ID: 1  or  X-Server-ID: 2
+POST -> ignore incoming id                 generate: max(existing ids) + 1
+DELETE success                             HTTP 204 No Content (empty body)
+DELETE not found                           HTTP 404 Not Found
+Filter                                     ?status=X -> filter list by status
+Router sequence (repeats forever)          PY PY JS JS JS PY PY JS JS JS ...
+Router must forward                        method + path + query params + body
+
+PORTS (DO NOT CHANGE)
+  Router   -> 8000
+  Server 1 -> 8001  (Python Flask)
+  Server 2 -> 8002  (Express.js)
+
+EXAM SWAP CHECKLIST (when entity name changes e.g. protocols -> animals)
+  [ ] Replace 'protocols' with new entity name in all route paths
+  [ ] Replace 'protocols' key in db.json and load_data references
+  [ ] Update filter field if it is not 'status' (e.g. status -> registered)
+  [ ] Keep all logic 100% identical
+
+================================================================================
