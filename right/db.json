@@ -1,3 +1,16 @@
 {
-  "protocols": []
+  "protocols": [
+    {
+      "id": 1,
+      "section_code": "KAN-A7-012",
+      "street": "Vodickova",
+      "district": "Praha 1",
+      "length_m": 145,
+      "sanitation_type": "pressure",
+      "status": "completed",
+      "technician": "Alexandre Basseville",
+      "date": "2026-01-15",
+      "notes": "Nalezen mensi korenovy narust"
+    }
+  ]
 }
