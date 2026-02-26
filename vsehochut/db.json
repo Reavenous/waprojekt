@@ -1,0 +1,10 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "Alexandre Basseville",
+      "category": "VIP",
+      "status": "active"
+    }
+  ]
+}

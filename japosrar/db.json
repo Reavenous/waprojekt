@@ -1,0 +1,49 @@
+{
+  "socks": [
+    {
+      "id": 1,
+      "color": "red",
+      "pattern": "stripes",
+      "size": 42,
+      "location_lost": "Prádelna Karlín",
+      "reward": 50,
+      "found": false
+    },
+    {
+      "id": 2,
+      "color": "black",
+      "pattern": "plain",
+      "size": 39,
+      "location_lost": "Posilovna Vinohradská",
+      "reward": 20,
+      "found": false
+    },
+    {
+      "id": 3,
+      "color": "pink",
+      "pattern": "dots",
+      "size": 37,
+      "location_lost": "Kolej Strahov blok 7",
+      "reward": 100,
+      "found": true
+    },
+    {
+      "id": 4,
+      "color": "white",
+      "pattern": "christmas",
+      "size": 44,
+      "location_lost": "Plavecký stadion Podolí",
+      "reward": 30,
+      "found": false
+    },
+    {
+      "id": 5,
+      "color": "blue",
+      "pattern": "argyle",
+      "size": 41,
+      "location_lost": "Vlak ČD R14 Praha-Brno",
+      "reward": 75,
+      "found": false
+    }
+  ]
+}
