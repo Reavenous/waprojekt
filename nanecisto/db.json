@@ -1,0 +1,18 @@
+{
+  "games": [
+    {
+      "id": 1,
+      "name": "Osadnici z Katanu",
+      "category": "family",
+      "min_age": 10,
+      "available": true
+    },
+    {
+      "id": 2,
+      "name": "Alexandre Basseville: Tajemstvi kanalu",
+      "category": "strategy",
+      "min_age": 15,
+      "available": false
+    }
+  ]
+}
