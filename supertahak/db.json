@@ -1,0 +1,9 @@
+{
+  "protocols": [   // 🟡 ZDE ZMĚŇ (např. na "socks", "animals", "games")
+    {
+      "id": 1,
+      "name": "Alexandre Basseville", // 🟡 ZDE ZMĚŇ podle dat ze zadání
+      "status": "active"              // 🟡 ZDE ZMĚŇ podle dat ze zadání
+    }
+  ]
+}

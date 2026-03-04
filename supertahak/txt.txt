@@ -1,0 +1,70 @@
+6. CHECKLIST PŘED ODEVZDÁNÍM
+
+    [ ] Změnil jsem v kódu všechny výskyty "protocols" na novou entitu.
+
+    [ ] Smazal jsem z kódu metodu DELETE, pokud ji zadání nevyžaduje (aby mě nenachytali na kód navíc).
+
+    [ ] Upravil jsem název filtru (např. z "status" na "category").
+
+    [ ] Nastavil jsem správné střídání (SEQUENCE) v Routeru.
+
+    [ ] Mám spuštěné 3 terminály a žádný z nich nehází chybu.
+
+
+    1. KROK: Instalace knihoven (Hned na začátku)
+
+Otevři si terminál ve složce, kde máš ty své soubory, a zadej:
+
+    Pro Python (Flask a Requests):
+    pip install flask requests
+
+    Pro JavaScript (Express):
+    npm install express
+
+2. KROK: Spuštění serverů (Tři samostatná okna!)
+
+Rozklikni si tři okna terminálu, ve všech buď ve své složce s projektem a postupně je nahoď:
+
+    Terminál 1 (Python): python server1.py
+
+    Terminál 2 (JS): node server2.js
+
+    Terminál 3 (Router): python router.py
+
+3. KROK: Testování přes PowerShell (Otevři si čtvrté okno)
+
+Tady je arzenál příkazů, kterými ověříš, že ti fungují všechny metody:
+
+1. Získání všech záznamů (GET):
+curl.exe -i http://localhost:8000/protocols
+
+2. Získání jednoho záznamu (GET s ID):
+curl.exe -i http://localhost:8000/protocols/1
+
+3. Testování filtru (GET s parametrem):
+curl.exe -i "http://localhost:8000/protocols?status=active"
+
+4. Vytvoření nového záznamu (POST):
+Všimni si, že uvnitř těch dat musí být uvozovky "escapované" zpětným lomítkem \, aby to terminál správně přechroustal.
+curl.exe -i -X POST http://localhost:8000/protocols -H "Content-Type: application/json" -d "{\"name\": \"Novy Zaznam\", \"status\": \"active\"}"
+
+5. Úprava záznamu (PATCH nebo PUT):
+curl.exe -i -X PATCH http://localhost:8000/protocols/1 -H "Content-Type: application/json" -d "{\"status\": \"completed\"}"
+
+6. Smazání záznamu (DELETE):
+curl.exe -i -X DELETE http://localhost:8000/protocols/1
+
+
+🔥 Jak otestovat FAILOVER (Záchranu při pádu)
+
+Pokud tam zítra bude ten chyták s Failoverem (jako u ponožek), otestuješ to takto:
+
+    Ujisti se, že všechny servery běží.
+
+    Jdi do okna Terminálu 1 (Python) a zmáčkni Ctrl + C (tím ho "zabiješ").
+
+    V PowerShellu pošli obyčejný GET dotaz: curl.exe -i http://localhost:8000/protocols
+
+    Výsledek: Místo chyby ti musí přijít data a v nich hlavička X-Server-ID: 2 (router poznal, že Python umřel, a hodil to na JavaScript).
+
+Vytiskni nebo ulož si tyhle příkazy k tomu velkému taháku a zítra to tam pošli s plnou parádou. Držím palce, ať to na tenhle pokus cinkne na 100 bodů!
